@@ -41,3 +41,13 @@ func InsertUser(newUser models.User) int {
 
 	return userId
 }
+
+func DeleteUserDb(userid int) (result string) {
+	db := database.DbInIt()
+	defer db.Close()
+	_, err := db.Exec("DELETE FROM users WHERE user_id = $1", userid)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return "User deleted"
+}

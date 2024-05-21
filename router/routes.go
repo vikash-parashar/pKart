@@ -8,6 +8,7 @@ import (
 
 func PkartRoutes() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/user/create", handlers.CreateUserHandler).Methods("Post")
+	r.HandleFunc("/user/create", handlers.CreateUserHandler).Methods("POST")
+	r.HandleFunc("/user/deletebyuserid/{id}", handlers.DeleteUserHandler).Methods("DELETE")
 	return r
 }
