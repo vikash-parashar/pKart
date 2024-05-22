@@ -2,12 +2,12 @@ package controllers
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"pkart/database"
 	"pkart/models"
+	"pkart/utils"
 	"time"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 func CreateUserTable(*sql.DB) {
@@ -30,9 +30,9 @@ func InsertUser(newUser models.User) int {
 	CreateUserTable(db)
 	var userId int
 	query := (`INSERT INTO users(gmail_id,password,created_at)VALUES($1,$2,$3)RETURNING user_id`)
-	HashPass, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), bcrypt.DefaultCost)
-	if err != nil {
-		log.Fatalf("Unable to insert user execute the query. %v", err)
+	HashPass, err := utils.GenerateHashPassword(newUser.Password)
+	if err!=nil{
+		log.Fatalf("Unable to generate hash password: %V",err)
 	}
 	err = db.QueryRow(query, newUser.GmailId, string(HashPass), time.Now()).Scan(&userId)
 	if err != nil {
@@ -42,12 +42,23 @@ func InsertUser(newUser models.User) int {
 	return userId
 }
 
-func DeleteUserDb(userid int) (result string) {
+func DeleteUserDb(userid int) (result string, err error) {
 	db := database.DbInIt()
 	defer db.Close()
-	_, err := db.Exec("DELETE FROM users WHERE user_id = $1", userid)
+
+	res, err := db.Exec("DELETE FROM users WHERE user_id = $1", userid)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
-	return "User deleted"
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return "", err
+	}
+
+	if rowsAffected == 0 {
+		return "", errors.New("user ID does not exist")
+	}
+
+	return "User deleted", nil
 }
