@@ -20,10 +20,21 @@ func CreateUserTable(*sql.DB) {
 )`
 	_, err := db.Exec(query)
 	if err != nil {
-		log.Fatalf("Error during execute database %v", err)
+		log.Fatalf("Error during execute database query %v", err)
 	}
 }
+// func GetUserbyGmail(gmailId string) models.User {
+// 	var user models.User
+// 	db := database.DbInIt()
+// 	defer db.Close()
+// 	row := db.QueryRow(`SELECT user_id, gmail_id, password, created_at FROM users WHERE gmail_id=$1`, gmailId)
+// 	err := row.Scan(&user.UserId, &user.GmailId, &user.Password, &user.CreatedAt)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	return user
 
+// }
 func InsertUser(newUser models.User) int {
 	db := database.DbInIt()
 	defer db.Close()
@@ -31,8 +42,8 @@ func InsertUser(newUser models.User) int {
 	var userId int
 	query := (`INSERT INTO users(gmail_id,password,created_at)VALUES($1,$2,$3)RETURNING user_id`)
 	HashPass, err := utils.GenerateHashPassword(newUser.Password)
-	if err!=nil{
-		log.Fatalf("Unable to generate hash password: %V",err)
+	if err != nil {
+		log.Fatalf("Unable to generate hash password: %V", err)
 	}
 	err = db.QueryRow(query, newUser.GmailId, string(HashPass), time.Now()).Scan(&userId)
 	if err != nil {

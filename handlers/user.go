@@ -48,6 +48,18 @@ func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// func GetUerByEmail(w http.ResponseWriter, r *http.Request) {
+// 	paramsId := mux.Vars(r)
+// 	gmailID := paramsId["id"]
+// 	user := controllers.GetUserbyGmail(gmailID)
+//   if err != nil {
+//   	http.Error(w, "no user found with Gmail ID:", http.StatusNotFound)
+//   }
+// 	w.WriteHeader(http.StatusOK)
+// 	w.Header().Set("content-type", "aplication/json")
+// 	json.NewEncoder(w).Encode(user)
+
+// }
 func UserLogin(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 
