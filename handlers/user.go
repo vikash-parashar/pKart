@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"pkart/controllers"
 	"pkart/models"
+	"pkart/utils"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -49,6 +50,24 @@ func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func UserLogin(w http.ResponseWriter, r *http.Request) {
 	var user models.User
-	json.NewDecoder(r.Body).Decode(&user)
+
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	authenticated, err := utils.AuthenticateUser(user.GmailId, user.Password)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	if authenticated {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Login successful"))
+	} else {
+		http.Error(w, "Invalid gmail or password", http.StatusUnauthorized)
+	}
 
 }

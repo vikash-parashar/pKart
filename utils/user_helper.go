@@ -1,9 +1,10 @@
 package utils
 
 import (
+	"database/sql"
+	"errors"
 	"log"
 	"pkart/database"
-	"pkart/models"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -16,7 +17,22 @@ func GenerateHashPassword(password string) (string, error) {
 	}
 	return string(HashPass), nil
 }
-func GetUserEmailId(user models.User) {
+func AuthenticateUser(gmailID, password string) (bool, error) {
+	var storedHash string
 	db := database.DbInIt()
-	query:=`SELECT email_id WHERE `
+	query := "SELECT password FROM users WHERE gmail_id = $1"
+	err := db.QueryRow(query, gmailID).Scan(&storedHash)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, errors.New("invalid gmail or password")
+		}
+		return false, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(password))
+	if err != nil {
+		return false, errors.New("invalid gmail or password")
+	}
+
+	return true, nil
 }

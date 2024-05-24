@@ -8,7 +8,7 @@ import (
 )
 
 func DbInIt() *sql.DB {
-	ConnStr := `host=localhost port=8080 user=postgres password=Pawan@2003 dbname=P-kart sslmode=disable`
+	ConnStr := `host=localhost port=5432 user=postgres password=Pawan@2003 dbname=P-kart sslmode=disable`
 	db, err := sql.Open("postgres", ConnStr)
 	if err != nil {
 		log.Fatalf("Error while exucting connection string %v", err)
