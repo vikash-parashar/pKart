@@ -33,7 +33,7 @@ func CreateUserTable(*sql.DB) {
 // 		log.Fatal(err)
 // 	}
 // 	return user
-
+ 
 // }
 func InsertUser(newUser models.User) int {
 	db := database.DbInIt()

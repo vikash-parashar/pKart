@@ -15,7 +15,7 @@ func PkartRoutes() *mux.Router {
 
 	// Customer Routes
 
-	r.HandleFunc("/customer/create/profile", handlers.CreateCustomerProfile)
+	r.HandleFunc("/customer/create/profile", handlers.CreateCustomerProfile).Methods("POST")
 
 	return r
 }

@@ -6,5 +6,5 @@ type Address struct {
 	District string `json:"district"`
 	State    string `json:"state"`
 	Country  string `json:"country"`
-	AreaCode string `json:"area_code"`
+	PinCode  string `json:"pin_code"`
 }
