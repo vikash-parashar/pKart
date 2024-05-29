@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"fmt"
 	"log"
+
 	"pkart/database"
 	"pkart/models"
 	"time"
@@ -10,60 +12,62 @@ import (
 func createAddressTable() {
 	db := database.DbInIt()
 	query := `CREATE TABLE  IF NOT EXISTS addresses(
-		// id SERIAL PRIMARY KEY,
-		customer_id INT,
-		house_no VARCHAR(50) NOT NULL,
-		town VARCHAR(100) NOT NULL,
-		district VARCHAR(100) NOT NULL,
-		state VARCHAR(100) NOT NULL,
-		country  VARCHAR(100) NOT NULL,
-		pin_code INT,
-		FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
-			)`
-	res, err := db.Exec(query)
+	customer_id INT REFERENCES customers(customer_id),
+	house_no VARCHAR(50),
+	town VARCHAR(50),
+	district VARCHAR(50),
+	state VARCHAR(50),
+	country VARCHAR(50),
+	pin_code VARCHAR(10)
+	
+	)`
+	_, err := db.Exec(query)
 	if err != nil {
 		log.Fatalf("error while excute create address table query %v", err)
 	}
-	if res != nil {
-		println("Table create succesfuly")
-	}
+
 }
 
 func createCustomerTable() {
 	db := database.DbInIt()
-	stmt := `CREATE  TABLE IF NOT EXISTS customers(
+	query := `CREATE  TABLE IF NOT EXISTS customers(
 		customer_id SERIAL PRIMARY KEY,
-		first_name VARCHAR(255),
-		last_name VARCHAR(255),
+		first_name VARCHAR(50),
+		last_name VARCHAR(50),
 		date_of_birth VARCHAR(20),
-		mobile_no VARCHAR(255),
+		mobile_no VARCHAR(15),
 		created_at TIMESTAMP
     )`
-	res, err := db.Exec(stmt)
+	_, err := db.Exec(query)
 	if err != nil {
 		log.Fatalf("error while excute create customer table query %v", err)
 	}
-	if res != nil {
-		println("Table create succesfuly")
-	}
-
 }
-func InsertCustomer(models.Customer, models.Address) {
+
+func InsertCustomer(new models.Customer, addr models.Address) int {
 	db := database.DbInIt()
-	var newCustomer models.Customer
+	defer db.Close()
+	// var newCustomer models.Customer
 	var id int
 	createCustomerTable()
-	query := (`INSERT INTO customers(customer_id,first_name,last_name,date_of_birth,mobile_no,created_at)VALUES($1,$2,$3,$4,$5,$6)RETURNING id`)
-	err := db.QueryRow(query, newCustomer.CustomerId, newCustomer.FirstName, newCustomer.LastName, newCustomer.DateOfBirth, newCustomer.MobileNo, time.Now()).Scan(&id)
+	query := `INSERT INTO customers(first_name,last_name,date_of_birth,mobile_no,created_at)VALUES($1,$2,$3,$4,$5)RETURNING customer_id`
+	err := db.QueryRow(query, new.FirstName, new.LastName, new.DateOfBirth, new.MobileNo, time.Now()).Scan(&id)
 	if err != nil {
 		log.Fatalf("error while excute insert customer table query %v", err)
 	}
 	// Insert Address
 
 	createAddressTable()
-	stmt := (`INSERT INTO customers(customer_id,first_name,last_name,date_of_birth,mobile_no,created_at)VALUES($1,$2,$3,$4,$5,$6)RETURNING id`)
-	err := db.QueryRow(query, newCustomer.CustomerId, newCustomer.FirstName, newCustomer.LastName, newCustomer.DateOfBirth, newCustomer.MobileNo, time.Now()).Scan(&id)
+	sqlStatement := `INSERT INTO addresses (customer_id, house_no, town, district, state, country, pin_code)
+	VALUES ($1, $2, $3, $4, $5, $6, $7)`
+
+	_, err = db.Exec(sqlStatement, id, addr.HouseNo, addr.Town, addr.District, addr.State, addr.Country, addr.PinCode)
 	if err != nil {
 		log.Fatalf("error while excute insert customer table query %v", err)
+
 	}
+	fmt.Println("Customer Details:", new)
+	fmt.Println("Address Details:", addr)
+	return id
+
 }

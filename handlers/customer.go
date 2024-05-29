@@ -3,14 +3,25 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"pkart/controllers"
 	"pkart/models"
+	"pkart/utils"
 )
 
 func CreateCustomerProfile(w http.ResponseWriter, r *http.Request) {
+	// var newCustomer struct {
+	// 	Customer models.Customer
+	// 	Address  models.Address
+	// }
 	var newCustomer models.Customer
-	json.NewDecoder(r.Body).Decode(&newCustomer)
+	err := json.NewDecoder(r.Body).Decode(&newCustomer)
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+	}
 	w.Header().Set("content-type", "aplication/json")
 	w.WriteHeader(http.StatusCreated)
-	customer := controllers.InsertCustomer(newCustomer)
+	customerId := utils.InsertCustomer(newCustomer,newCustomer.Address)
+	err = json.NewEncoder(w).Encode(customerId)
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+	}
 }
