@@ -69,17 +69,16 @@ func UserLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authenticated, err := utils.AuthenticateUser(user.GmailId, user.Password)
+	authenticated, err := utils.AuthenticateUser(w, user.GmailId, user.Password)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"err": "error while user login"})
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	if authenticated {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Login successful"))
-	} else {
-		http.Error(w, "Invalid gmail or password", http.StatusUnauthorized)
+	err = json.NewEncoder(w).Encode(map[string]string{"token": authenticated})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
-
 }

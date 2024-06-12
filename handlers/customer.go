@@ -8,10 +8,6 @@ import (
 )
 
 func CreateCustomerProfile(w http.ResponseWriter, r *http.Request) {
-	// var newCustomer struct {
-	// 	Customer models.Customer
-	// 	Address  models.Address
-	// }
 	var newCustomer models.Customer
 	err := json.NewDecoder(r.Body).Decode(&newCustomer)
 	if err != nil {
